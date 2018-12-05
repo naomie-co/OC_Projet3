@@ -35,16 +35,16 @@ class Maze:
         self.gardien = Characters("G", const.GUARDIAN_PICTURE, self.p_maze)
 
     def open_maze(self):
+    	"""opens the maze file, adds it to the variable self.p_maze and removes the "\n" at the end of each line
+    	"""
         with open("maze.txt", "r") as read_maze:
             self.p_maze.extend(read_maze.readlines())
         for i, elt in enumerate(self.p_maze):
             self.p_maze[i] = self.p_maze[i].strip("\n")
 
-    # def print_maze(self):
-    #     for elt in self.p_maze:
-    #         print(elt)
-        
     def position(self, line, column, letter):
+
+    	#"." represents the floor
         if self.p_maze[line][column] in [".", self.macgaver.letter, self.objects[0].letter,self.objects[1].letter, self.objects[2].letter,
         self.gardien.letter]:
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
@@ -55,13 +55,18 @@ class Maze:
 
 
     def object_position(self, line, column, letter):
-        if self.p_maze[line][column] == ".":
+
+    	#"." represents the floor
+        if self.p_maze[line][column] == ".": 
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
             return True
         else:
             return False
         
     def random_pos(self):
+    	"""Randomly determines the index of an object. If tbe position is possible, using the self.object_position, it continues
+    	to the next object
+    	"""
         temp = 0
         while temp < len(self.objects):
             line = random.randint(0, 14)
@@ -102,7 +107,7 @@ class Maze:
             return True
         
     def display_maze(self, WINDOW):
-        """Permet d'afficher le labyrinthe en mode graphique
+        """Prints the maze in graphic mode
         """ 
         wall = pygame.image.load(const.WALL_PICTURE).convert()
         floor = pygame.image.load(const.FLOOR_PICTURE).convert()
@@ -135,7 +140,10 @@ class Maze:
             nb_line += 1
 
     def move_pygame(self, key):
-        p_macgaver = self.macgaver.find_position(self.p_maze)        
+    	"""Moves macgaver: takes a key as argument. Depending on the key, it defines mac_gaver's new position and modifies the old one.
+    	Uses a methode and an attribute of the Character's class to find macgaver's position
+    	"""
+        p_macgaver = self.macgaver.find_position(self.p_maze) 
         if key == K_UP:
             if self.position(p_macgaver[0]-1, p_macgaver[1], self.macgaver.letter):
                 self.position(p_macgaver[0], p_macgaver[1], ".")
@@ -148,8 +156,8 @@ class Maze:
         elif key == K_RIGHT:
             if self.position(p_macgaver[0], p_macgaver[1]+1, self.macgaver.letter):
                 self.position(p_macgaver[0], p_macgaver[1], ".")
-        self.items()
-        self.gagne()      
+        self.items() #chek the score
+        self.gagne() #chek if the game ends and if the player wins or loses    
 
 class Characters:
     def __init__(self, letter, image, p_maze):
