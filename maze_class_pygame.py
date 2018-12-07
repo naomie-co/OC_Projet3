@@ -33,10 +33,9 @@ class Maze:
         Characters("T", const.TUBE_PICTURE, self.p_maze)]
         self.score = 0
         self.gardien = Characters("G", const.GUARDIAN_PICTURE, self.p_maze)
+        self.game_over = False
 
     def open_maze(self):
-    	"""opens the maze file, adds it to the variable self.p_maze and removes the "\n" at the end of each line
-    	"""
         with open("maze.txt", "r") as read_maze:
             self.p_maze.extend(read_maze.readlines())
         for i, elt in enumerate(self.p_maze):
@@ -44,9 +43,8 @@ class Maze:
 
     def position(self, line, column, letter):
 
-    	#"." represents the floor
-        if self.p_maze[line][column] in [".", self.macgaver.letter, self.objects[0].letter,self.objects[1].letter, self.objects[2].letter,
-        self.gardien.letter]:
+        #"." represents the floor
+        if self.p_maze[line][column] in [".", self.macgaver.letter, self.objects[0].letter,self.objects[1].letter, self.objects[2].letter, self.gardien.letter]:
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
             return True
         else:
@@ -56,17 +54,16 @@ class Maze:
 
     def object_position(self, line, column, letter):
 
-    	#"." represents the floor
+        #"." represents the floor
         if self.p_maze[line][column] == ".": 
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
             return True
         else:
             return False
         
-    def random_pos(self):
-    	"""Randomly determines the index of an object. If tbe position is possible, using the self.object_position, it continues
-    	to the next object
-    	"""
+    def random_pos(self): 
+        """Randomly determines the index of an object. If tbe position is possible, using the self.object_position, 
+it continues to the next object"""
         temp = 0
         while temp < len(self.objects):
             line = random.randint(0, 14)
@@ -97,18 +94,23 @@ class Maze:
         return self.score
              
     def gagne(self):
+        y = (const.SPRITE_HEIGTH - 1) * const.SPRITE_SIZE
+        x = const.SPRITE_SIZE * 7
+        gagne = pygame.image.load(const.GAGNE_PICTURE).convert()
+        perdu = pygame.image.load(const.PERDU_PICTURE).convert()
         if self.gardien.find_position(self.p_maze) == None:
             if self.score == len(self.objects):
-                print("Gagné!")
+                WINDOW.blit(gagne, (x, y))
+
             else:
-                print("Perdu!")
+                WINDOW.blit(perdu, (x, y))
+            self.game_over = True
             return False
         else:
             return True
         
     def display_maze(self, WINDOW):
-        """Prints the maze in graphic mode
-        """ 
+        """Prints the maze in graphic mode""" 
         wall = pygame.image.load(const.WALL_PICTURE).convert()
         floor = pygame.image.load(const.FLOOR_PICTURE).convert()
         nb_line = 0
@@ -140,24 +142,25 @@ class Maze:
             nb_line += 1
 
     def move_pygame(self, key):
-    	"""Moves macgaver: takes a key as argument. Depending on the key, it defines mac_gaver's new position and modifies the old one.
-    	Uses a methode and an attribute of the Character's class to find macgaver's position
-    	"""
-        p_macgaver = self.macgaver.find_position(self.p_maze) 
-        if key == K_UP:
-            if self.position(p_macgaver[0]-1, p_macgaver[1], self.macgaver.letter):
-                self.position(p_macgaver[0], p_macgaver[1], ".")
-        elif key == K_DOWN:
-            if self.position(p_macgaver[0]+1, p_macgaver[1], self.macgaver.letter):
-                self.position(p_macgaver[0], p_macgaver[1], ".")
-        elif key == K_LEFT:
-            if self.position(p_macgaver[0], p_macgaver[1]-1, self.macgaver.letter):
-                self.position(p_macgaver[0], p_macgaver[1], ".")
-        elif key == K_RIGHT:
-            if self.position(p_macgaver[0], p_macgaver[1]+1, self.macgaver.letter):
-                self.position(p_macgaver[0], p_macgaver[1], ".")
-        self.items() #chek the score
-        self.gagne() #chek if the game ends and if the player wins or loses    
+        """Moves macgaver: takes a key as argument. Depending on the key, it defines mac_gaver's new position and modifies the old one.
+Uses a methode and an attribute of the Character's class to find macgaver's position"""
+        
+        if self.game_over == False:
+            p_macgaver = self.macgaver.find_position(self.p_maze) 
+            if key == K_UP:
+                if self.position(p_macgaver[0]-1, p_macgaver[1], self.macgaver.letter):
+                    self.position(p_macgaver[0], p_macgaver[1], ".")
+            elif key == K_DOWN:
+                if self.position(p_macgaver[0]+1, p_macgaver[1], self.macgaver.letter):
+                    self.position(p_macgaver[0], p_macgaver[1], ".")
+            elif key == K_LEFT:
+                if self.position(p_macgaver[0], p_macgaver[1]-1, self.macgaver.letter):
+                    self.position(p_macgaver[0], p_macgaver[1], ".")
+            elif key == K_RIGHT:
+                if self.position(p_macgaver[0], p_macgaver[1]+1, self.macgaver.letter):
+                    self.position(p_macgaver[0], p_macgaver[1], ".")
+            self.items() #chek the score
+            self.gagne() #chek if the game ends and if the player wins or loses    
 
 class Characters:
     def __init__(self, letter, image, p_maze):
@@ -180,7 +183,6 @@ class Characters:
 #Ouverture de la fenêtre Pygame
 WINDOW = pygame.display.set_mode((const.WINDOW_WIDTH, const.WINDOW_HEIGTH))
 laby = Maze()
-laby.macgaver.position
 laby.random_pos()
 #Rafraîchissement de l'écran
 pygame.display.flip()
