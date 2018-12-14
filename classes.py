@@ -1,30 +1,16 @@
 import os
 import random
 import pygame
-import const
 from pygame.locals import *
+import const
 
 pygame.init()
 
 os.chdir("C:/Users/firef_000/Documents/Openclassrooms/Projets/Projet_3")
 
 class Maze:
-    """Maze permet de créer le labyrinthe (dans un fichier indépendant)
-    Elle possède comme attributs:
-    et comme méthode:
-    -open_maze: ouvre le fichier maze et l'assigne à une variable read_maze
-    -print_maze: pour imprimer le fichier maze et l'assigner à la variable
-    p_maze
-    -position:
-    -find_position:
-    -move:
-    -object_position:
-    -random_pos:
-    -items:
-    -gagne:
-    -display_maze:
-    move_pygame:
-    """
+    """The Maze class is used to import the maze from a txt file, to display it in graphic mode, to integrate objects randomly, to
+    move character and to chek the score. It uses some attributes from the Character's class."""
     def __init__(self):
         self.p_maze = []
         self.open_maze()
@@ -33,28 +19,25 @@ class Maze:
         Characters("T", const.TUBE_PICTURE, self.p_maze)]
         self.score = 0
         self.gardien = Characters("G", const.GUARDIAN_PICTURE, self.p_maze)
-        self.game_over = False
+        self.game_over = False #about  the main loop of the game
 
     def open_maze(self):
+        """Opens the maze file, reads it, add line by line on the list attribute self.p_maze, and removes the "\n" """
         with open("maze.txt", "r") as read_maze:
             self.p_maze.extend(read_maze.readlines())
         for i, elt in enumerate(self.p_maze):
             self.p_maze[i] = self.p_maze[i].strip("\n")
 
     def position(self, line, column, letter):
-
-        #"." represents the floor
+        """Prints a character on the maze who can be on the maze,so it can move on a object """
         if self.p_maze[line][column] in [".", self.macgaver.letter, self.objects[0].letter,self.objects[1].letter, self.objects[2].letter, self.gardien.letter]:
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
             return True
         else:
             return False
 
-
-
     def object_position(self, line, column, letter):
-
-        #"." represents the floor
+        """Prints an items only on the floor. "." represents the floor"""
         if self.p_maze[line][column] == ".": 
             self.p_maze[line] = self.p_maze[line][:column] + letter + self.p_maze[line][column+1:]
             return True
@@ -62,8 +45,8 @@ class Maze:
             return False
         
     def random_pos(self): 
-        """Randomly determines the index of an object. If tbe position is possible, using the self.object_position, 
-it continues to the next object"""
+        """Randomly determines the index of an object. If the position is possible, by using the self.object_position, 
+        it continues to the next object"""
         temp = 0
         while temp < len(self.objects):
             line = random.randint(0, 14)
@@ -71,7 +54,8 @@ it continues to the next object"""
             if self.object_position(line, column, self.objects[temp].letter):
                 temp += 1
     
-    def items(self):
+    def items(self, WINDOW):
+        """Picks up the items in the maze and prints it at the bottom of the maze. Returns the player's score"""
         objets_collectes = list(self.objects)
         y = (const.SPRITE_HEIGTH - 1) * const.SPRITE_SIZE
         x = const.SPRITE_SIZE * 3
@@ -90,10 +74,11 @@ it continues to the next object"""
             elif elt.letter == "T":
                 WINDOW.blit(self.objects[2].image, (x + 2*const.SPRITE_SIZE, y))
         self.score = len(self.objects) - self.score
-        print("score : ", self.score)
         return self.score
              
-    def gagne(self):
+    def gagne(self, WINDOW):
+        """check if the player picked up every items in the maze, when macgaver arrives on the guardien. Print a won/lost message. 
+        Allows to finish the game"""
         y = (const.SPRITE_HEIGTH - 1) * const.SPRITE_SIZE
         x = const.SPRITE_SIZE * 7
         gagne = pygame.image.load(const.GAGNE_PICTURE).convert()
@@ -104,7 +89,7 @@ it continues to the next object"""
 
             else:
                 WINDOW.blit(perdu, (x, y))
-            self.game_over = True
+            self.game_over = True #end of the main loop of the game
             return False
         else:
             return True
@@ -159,16 +144,19 @@ Uses a methode and an attribute of the Character's class to find macgaver's posi
             elif key == K_RIGHT:
                 if self.position(p_macgaver[0], p_macgaver[1]+1, self.macgaver.letter):
                     self.position(p_macgaver[0], p_macgaver[1], ".")
-            self.items() #chek the score
-            self.gagne() #chek if the game ends and if the player wins or loses    
+            self.items(const.WINDOW) #check the score
+            self.gagne(const.WINDOW) #check if the game ends and if the player wins or loses    
 
 class Characters:
+    """Class Characters initialize a character or item and allows with an attribute. Methode find position to identify the coordinates of a
+    character """
     def __init__(self, letter, image, p_maze):
         self.letter = letter
         self.image = pygame.image.load(image).convert_alpha()
         self.position = self.find_position(p_maze)
 
     def find_position(self, p_maze):
+        """Finds the position of a character, and return a tuple of coordinates """
         for i, elt in enumerate(p_maze):
             if self.letter in elt:
                 iline = i
@@ -180,19 +168,3 @@ class Characters:
 
 
 
-#Ouverture de la fenêtre Pygame
-WINDOW = pygame.display.set_mode((const.WINDOW_WIDTH, const.WINDOW_HEIGTH))
-laby = Maze()
-laby.random_pos()
-#Rafraîchissement de l'écran
-pygame.display.flip()
-
-continuer = 1
-while continuer:
-    laby.display_maze(WINDOW)
-    pygame.display.flip()
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            continuer = 0
-        elif event.type == KEYDOWN:
-            laby.move_pygame(event.key)       
