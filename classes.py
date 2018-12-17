@@ -94,7 +94,7 @@ class Maze:
     def win_lose(self):
         """Check if the player picked up every item in the maze, when macgyver
         arrives on the guardien. Print a win/lose message. Stop the condition
-        for the move_pygame method."""
+        for the move_pygame method. Uses as a condition on the loop's game"""
         win = pygame.image.load(const.WIN_PICTURE).convert()
         lose = pygame.image.load(const.LOSE_PICTURE).convert()
         if self.gardien.find_position(self.p_maze) is None:
